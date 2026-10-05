@@ -1,4 +1,5 @@
 export type PasswordConfigurationReason =
+  | "INVALID_LENGTH"
   | "INVALID_MINIMUM"
   | "MINIMUM_FOR_DISABLED_GROUP";
 
