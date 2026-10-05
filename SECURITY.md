@@ -1,5 +1,12 @@
 # Security Policy
 
+## Supported versions
+
+The current pre-1.0 release line is `0.1.x`. Security fixes are applied to the
+latest development state and should be released as a new patch version.
+
+The project has not undergone an independent security audit.
+
 ## Scope
 
 Security reports are especially important for:
