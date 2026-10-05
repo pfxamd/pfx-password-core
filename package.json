@@ -1,0 +1,29 @@
+{
+  "name": "pfx-password-core",
+  "version": "0.0.0-development",
+  "description": "Security-focused TypeScript core for password and passphrase generation.",
+  "type": "module",
+  "private": true,
+  "license": "Apache-2.0",
+  "sideEffects": false,
+  "engines": { "node": ">=20" },
+  "files": ["dist", "LICENSE", "NOTICE", "README.md", "THIRD_PARTY_NOTICES.md"],
+  "exports": { ".": { "types": "./dist/index.d.ts", "import": "./dist/index.js" } },
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "test": "vitest run",
+    "check": "npm run typecheck && npm run lint && npm run format:check && npm run test && npm run build"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.0",
+    "eslint": "^9.39.0",
+    "prettier": "^3.6.2",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.46.0",
+    "vitest": "^4.0.0"
+  }
+}
