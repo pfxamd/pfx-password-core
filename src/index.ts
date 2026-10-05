@@ -20,6 +20,7 @@ export type {
 export {
   countPasswordSearchSpace,
 } from "./password/generate.js";
+export { MAX_PASSWORD_LENGTH } from "./password/limits.js";
 export {
   PasswordConfigurationError,
   type PasswordConfigurationReason,
