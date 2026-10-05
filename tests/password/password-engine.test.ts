@@ -4,6 +4,7 @@ import { UnsatisfiableConstraintsError } from "../../src/constraints/index.js";
 import {
   ASCII_SYMBOLS,
   LOWERCASE,
+  MAX_PASSWORD_LENGTH,
   PasswordConfigurationError,
   countPasswordSearchSpace,
   generatePassword,
@@ -127,16 +128,18 @@ describe("password option validation", () => {
     ).toThrow(PasswordConfigurationError);
   });
 
-  it("rejects invalid password lengths through the password API", () => {
-    expect(() =>
-      countPasswordSearchSpace({
-        length: -1,
-        lowercase: true,
-        uppercase: true,
-        digits: true,
-        symbols: true,
-      }),
-    ).toThrow(PasswordConfigurationError);
+  it("rejects zero, negative, and excessive password lengths", () => {
+    for (const length of [-1, 0, MAX_PASSWORD_LENGTH + 1]) {
+      expect(() =>
+        countPasswordSearchSpace({
+          length,
+          lowercase: true,
+          uppercase: true,
+          digits: true,
+          symbols: true,
+        }),
+      ).toThrow(PasswordConfigurationError);
+    }
   });
 
   it("rejects invalid minimums even when the group is disabled", () => {
