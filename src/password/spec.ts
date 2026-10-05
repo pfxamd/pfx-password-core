@@ -45,6 +45,13 @@ function normalizeMinimum(group: RawGroup): number {
 export function buildPasswordSpec(
   options: PasswordGenerationOptions,
 ): ConstrainedSequenceSpec<string> {
+  if (!Number.isSafeInteger(options.length) || options.length < 0) {
+    throw new PasswordConfigurationError(
+      "INVALID_LENGTH",
+      "length must be a non-negative safe integer.",
+    );
+  }
+
   const excluded = new Set<string>([...(options.excludedCharacters ?? "")]);
 
   if (options.excludeAmbiguous ?? false) {
