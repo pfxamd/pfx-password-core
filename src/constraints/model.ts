@@ -260,6 +260,28 @@ function createCounter<T>(prepared: PreparedSpec<T>) {
   return count;
 }
 
+function chooseGroupBySize<T>(
+  source: RandomSource,
+  prepared: PreparedSpec<T>,
+): number {
+  if (prepared.alphabetSize === 0n) {
+    throw new UnsatisfiableConstraintsError();
+  }
+
+  const ticket = uniformBigInt(source, 0n, prepared.alphabetSize);
+  let cursor = 0n;
+
+  for (let groupIndex = 0; groupIndex < prepared.groups.length; groupIndex += 1) {
+    cursor += prepared.groups[groupIndex]?.size ?? 0n;
+
+    if (ticket < cursor) {
+      return groupIndex;
+    }
+  }
+
+  throw new Error("Alphabet selection reached an unreachable state.");
+}
+
 function chooseWeightedGroup<T>(
   source: RandomSource,
   prepared: PreparedSpec<T>,
@@ -267,6 +289,10 @@ function chooseWeightedGroup<T>(
   deficits: readonly number[],
   count: (remaining: number, deficits: readonly number[]) => bigint,
 ): number {
+  if (sum(deficits) === 0) {
+    return chooseGroupBySize(source, prepared);
+  }
+
   const weights: bigint[] = [];
   let totalWeight = 0n;
 
