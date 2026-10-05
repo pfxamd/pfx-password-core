@@ -2,13 +2,15 @@
 
 Security-focused TypeScript core for password and passphrase generation.
 
-> Status: early development. The secure random layer exists; password,
-> passphrase, constraint, entropy, and batch engines are not yet released.
+> Status: early development. The secure random layer and exact constrained
+> sequence sampler exist; password, passphrase, entropy, and batch engines are
+> not yet released.
 
 ## Design goals
 
 - cryptographically secure randomness from Web Crypto;
 - unbiased bounded sampling using rejection sampling;
+- exact uniform sampling under minimum-group constraints;
 - framework-independent core with zero runtime dependencies;
 - browser and Node.js support;
 - no storage, analytics, telemetry, or network requirement for generation;
@@ -17,7 +19,9 @@ Security-focused TypeScript core for password and passphrase generation.
 
 ## Current foundation
 
-The first implemented layer is `src/random`:
+### Secure random layer
+
+The `src/random` layer contains:
 
 - `RandomSource` abstraction;
 - `WebCryptoRandomSource`;
@@ -26,6 +30,21 @@ The first implemented layer is `src/random`:
 - `uniformBigInt()`;
 - `securePick()`;
 - `secureShuffle()`.
+
+### Uniform constrained sampler
+
+The `src/constraints` layer can:
+
+- model disjoint value groups with minimum occurrence counts;
+- count the exact number of valid sequences with `BigInt`;
+- return `0n` for mathematically unsatisfiable constraints;
+- sample uniformly from the complete valid search space;
+- reject overlapping values that would make group ownership ambiguous;
+- avoid recursive call-stack growth for long sequences;
+- cap memoized DP states to prevent unbounded resource use.
+
+For a valid search space of size `N`, each generated sequence has probability
+exactly `1 / N` under an unbiased `RandomSource`.
 
 The package root intentionally exposes no stable public API yet. Public exports
 will be frozen only after the password, passphrase, constraints, and entropy
