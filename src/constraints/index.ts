@@ -1,4 +1,5 @@
 export {
+  ConstraintComplexityError,
   ConstraintConfigurationError,
   UnsatisfiableConstraintsError,
   type ConstraintConfigurationReason,
