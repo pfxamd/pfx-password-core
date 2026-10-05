@@ -3,8 +3,8 @@
 Security-focused TypeScript core for password and passphrase generation.
 
 > Status: early development. Secure randomness, the exact constrained sampler,
-> password generation, passphrase generation, and generation-entropy analysis are
-> implemented. Batch and policy layers are still in progress.
+> password generation, passphrase generation, generation-entropy analysis, and
+> isolated batch generation are implemented. The policy layer is still in progress.
 
 ## Design goals
 
@@ -62,6 +62,23 @@ The `src/password` layer currently supports:
 The implementation does not generate mandatory characters separately and then
 shuffle them. Passwords are sampled directly from the mathematically defined
 valid space.
+
+### Batch engine
+
+The `src/batch` layer supports bounded multi-secret generation:
+
+- each result receives a distinct `RandomSource` object from a caller-supplied
+  factory;
+- reused source objects are rejected before any secret is generated;
+- password and passphrase options are preflight-validated before generation;
+- duplicate generated values are preserved rather than deduplicated, avoiding
+  distribution bias;
+- no history, cache, persistence, or telemetry is maintained;
+- batch size is bounded to `10000` results per call.
+
+The factory contract provides isolation at the JavaScript object level. A
+factory remains responsible for returning independently owned sources; the core
+cannot inspect hidden implementation state inside a custom source.
 
 ### Entropy engine
 
