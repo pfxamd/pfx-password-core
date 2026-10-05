@@ -1,6 +1,6 @@
 {
   "name": "pfx-password-core",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Security-focused TypeScript core for unbiased password and passphrase generation.",
   "type": "module",
   "private": true,
@@ -31,9 +31,11 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "test": "vitest run",
-    "check": "npm run typecheck && npm run lint && npm run test && npm run build && npm run pack:check",
+    "check": "npm run typecheck && npm run lint && npm run test && npm run build && npm run pack:check && npm run test:consumer",
     "test:browser": "vitest run --config vitest.browser.config.ts",
-    "pack:check": "npm pack --dry-run"
+    "pack:check": "npm pack --dry-run",
+    "prepare": "npm run build",
+    "test:consumer": "node scripts/consumer-smoke.mjs"
   },
   "devDependencies": {
     "@eslint/js": "10.0.1",
