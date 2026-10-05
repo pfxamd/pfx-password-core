@@ -2,9 +2,12 @@
 
 Security-focused TypeScript core for password and passphrase generation.
 
-> Status: early development. Secure randomness, exact constrained sampling,
-> password and passphrase generation, generation-entropy analysis, isolated batch
-> generation, policy evaluation, and the initial public API are implemented.
+> Current release target: `0.1.0`. The core implements secure random sourcing,
+> exact constrained sampling, password and passphrase generation, generation
+> entropy analysis, isolated batch generation, policy evaluation, and a public API.
+>
+> This project has not undergone an independent security audit. Pre-1.0 APIs may
+> change as the core is hardened and reviewed.
 
 ## Design goals
 
@@ -218,6 +221,8 @@ npm run lint
 npm run format:check
 npm run test
 npm run build
+npm run pack:check
+npm run test:browser
 ```
 
 ## Security principles
