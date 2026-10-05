@@ -113,6 +113,18 @@ describe("countConstrainedSequences", () => {
     }
   });
 
+  it("handles long sequences without recursive call-stack growth", () => {
+    const count = countConstrainedSequences({
+      length: 1_000,
+      groups: [
+        { values: ["a"], minimum: 1 },
+        { values: ["b"], minimum: 1 },
+      ],
+    });
+
+    expect(count).toBe(2n ** 1_000n - 2n);
+  });
+
   it("returns zero for impossible minimums", () => {
     expect(
       countConstrainedSequences({
