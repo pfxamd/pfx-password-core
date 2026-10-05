@@ -1,3 +1,4 @@
+import { UnsatisfiableConstraintsError } from "../constraints/errors.js";
 import type {
   PassphraseGenerationOptions,
   PassphraseWordlist,
@@ -11,7 +12,13 @@ import type { GenerationEntropy } from "./types.js";
 export function analyzePasswordGenerationEntropy(
   options: PasswordGenerationOptions,
 ): GenerationEntropy {
-  return generationEntropyFromSearchSpace(countPasswordSearchSpace(options));
+  const combinations = countPasswordSearchSpace(options);
+
+  if (combinations === 0n) {
+    throw new UnsatisfiableConstraintsError();
+  }
+
+  return generationEntropyFromSearchSpace(combinations);
 }
 
 export function analyzePassphraseGenerationEntropy(
