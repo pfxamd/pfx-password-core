@@ -1,7 +1,7 @@
 {
   "name": "pfx-password-core",
-  "version": "0.0.0-development",
-  "description": "Security-focused TypeScript core for password and passphrase generation.",
+  "version": "0.1.0",
+  "description": "Security-focused TypeScript core for unbiased password and passphrase generation.",
   "type": "module",
   "private": true,
   "license": "Apache-2.0",
@@ -14,7 +14,9 @@
     "LICENSE",
     "NOTICE",
     "README.md",
-    "THIRD_PARTY_NOTICES.md"
+    "SECURITY.md",
+    "THIRD_PARTY_NOTICES.md",
+    "CHANGELOG.md"
   ],
   "exports": {
     ".": {
@@ -29,17 +31,40 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "test": "vitest run",
-    "check": "npm run typecheck && npm run lint && npm run test && npm run build",
-    "test:browser": "vitest run --config vitest.browser.config.ts"
+    "check": "npm run typecheck && npm run lint && npm run test && npm run build && npm run pack:check",
+    "test:browser": "vitest run --config vitest.browser.config.ts",
+    "pack:check": "npm pack --dry-run"
   },
   "devDependencies": {
-    "@eslint/js": "^10.0.1",
-    "eslint": "^10.10.0",
-    "prettier": "^3.6.2",
-    "typescript": "^5.9.3",
-    "typescript-eslint": "^8.71.0",
+    "@eslint/js": "10.0.1",
+    "eslint": "10.10.0",
+    "prettier": "3.6.2",
+    "typescript": "5.9.3",
+    "typescript-eslint": "8.71.0",
     "vitest": "4.1.11",
     "@vitest/browser-playwright": "4.1.11",
     "playwright": "1.63.0"
-  }
+  },
+  "author": "PFxamd",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/pfxamd/pfx-password-core.git"
+  },
+  "homepage": "https://github.com/pfxamd/pfx-password-core#readme",
+  "bugs": {
+    "url": "https://github.com/pfxamd/pfx-password-core/issues"
+  },
+  "keywords": [
+    "password",
+    "passphrase",
+    "generator",
+    "cryptography",
+    "web-crypto",
+    "entropy",
+    "typescript",
+    "security"
+  ],
+  "packageManager": "npm@11.19.0",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts"
 }
