@@ -31,14 +31,13 @@ function validateCount(count: number): void {
   }
 }
 
-export function generateBatch<T>(
+function prepareSources(
   sourceFactory: RandomSourceFactory,
   count: number,
-  generateOne: (source: RandomSource, index: number) => T,
-): T[] {
+): RandomSource[] {
   validateCount(count);
 
-  const results: T[] = [];
+  const sources: RandomSource[] = [];
   const seenSources = new Set<RandomSource>();
 
   for (let index = 0; index < count; index += 1) {
@@ -52,10 +51,20 @@ export function generateBatch<T>(
     }
 
     seenSources.add(source);
-    results.push(generateOne(source, index));
+    sources.push(source);
   }
 
-  return results;
+  return sources;
+}
+
+export function generateBatch<T>(
+  sourceFactory: RandomSourceFactory,
+  count: number,
+  generateOne: (source: RandomSource, index: number) => T,
+): T[] {
+  const sources = prepareSources(sourceFactory, count);
+
+  return sources.map((source, index) => generateOne(source, index));
 }
 
 export function generatePasswordBatch(
@@ -63,6 +72,8 @@ export function generatePasswordBatch(
   count: number,
   options: PasswordGenerationOptions,
 ): string[] {
+  validateCount(count);
+
   const combinations = countPasswordSearchSpace(options);
 
   if (combinations === 0n) {
@@ -80,6 +91,8 @@ export function generatePassphraseBatch(
   wordlist: PassphraseWordlist,
   options: PassphraseGenerationOptions,
 ): string[] {
+  validateCount(count);
+
   // Preflight validation before the first secret is generated.
   countPassphraseSearchSpace(wordlist, options);
 
