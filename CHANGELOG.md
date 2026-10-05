@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 The project follows semantic versioning once releases are published. Pre-1.0
 interfaces may still change as the security model and public API mature.
 
+## 0.1.1 - 2026-10-06
+
+### Fixed
+
+- Added an npm `prepare` lifecycle script so direct GitHub installations build
+  the generated `dist/` entry points automatically.
+- Added a consumer smoke test that packs the library, installs it into an
+  isolated temporary project, and imports the public API from the installed
+  package.
+- CI now verifies that a clean checkout with no `dist/` directory recreates
+  the build during dependency installation.
+
 ## 0.1.0 - 2026-10-06
 
 ### Added
