@@ -2,7 +2,7 @@
 
 Security-focused TypeScript core for password and passphrase generation.
 
-> Current release target: `0.1.0`. The core implements secure random sourcing,
+> Current release target: `0.1.1`. The core implements secure random sourcing,
 > exact constrained sampling, password and passphrase generation, generation
 > entropy analysis, isolated batch generation, policy evaluation, and a public API.
 >
@@ -204,6 +204,19 @@ const policy = evaluatePasswordPolicy(
 Advanced callers and tests may inject a custom `RandomSource`. The production
 default remains `WebCryptoRandomSource`.
 
+### Install from GitHub
+
+The repository keeps generated `dist/` files out of source control. A
+`prepare` lifecycle script builds them automatically when npm installs the
+package directly from GitHub:
+
+```bash
+npm install github:pfxamd/pfx-password-core#v0.1.1
+```
+
+The package remains marked `private` to prevent accidental publication to the
+npm registry.
+
 ## Development
 
 Requires Node.js 22 or newer and npm 11 for development.
@@ -223,6 +236,7 @@ npm run test
 npm run build
 npm run pack:check
 npm run test:browser
+npm run test:consumer
 ```
 
 ## Security principles
