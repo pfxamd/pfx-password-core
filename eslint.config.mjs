@@ -9,6 +9,14 @@ export default tseslint.config(
   {
     rules: {
       "@typescript-eslint/consistent-type-imports": "error",
+      "no-restricted-properties": [
+        "error",
+        {
+          object: "Math",
+          property: "random",
+          message: "Use the cryptographic RandomSource layer instead.",
+        },
+      ],
     },
   },
 );
