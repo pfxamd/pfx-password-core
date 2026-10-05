@@ -329,7 +329,7 @@ export function sampleConstrainedSequence<T>(
 
   const result: T[] = [];
   let remaining = prepared.length;
-  let deficits = [...prepared.minimums];
+  const deficits = [...prepared.minimums];
 
   while (remaining > 0) {
     const groupIndex = chooseWeightedGroup(source, prepared, remaining, deficits, count);
