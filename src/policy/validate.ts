@@ -3,6 +3,7 @@ import type {
   PassphraseGenerationOptions,
   PassphraseWordlist,
 } from "../passphrase/types.js";
+import { buildPasswordSpec } from "../password/spec.js";
 import type { PasswordGenerationOptions } from "../password/types.js";
 import type {
   GenerationRecommendationPolicy,
@@ -84,8 +85,24 @@ function entropyFinding(
   };
 }
 
-function guaranteedMinimum(value: number | undefined): number {
-  return value ?? 0;
+type PasswordGroupId = "lowercase" | "uppercase" | "digits" | "symbols";
+
+function guaranteedMinimumForGroup(
+  options: PasswordGenerationOptions,
+  groupId: PasswordGroupId,
+): number {
+  const spec = buildPasswordSpec(options);
+  const target = spec.groups.find((group) => group.id === groupId);
+
+  if (target === undefined || target.values.length === 0) {
+    return 0;
+  }
+
+  const anotherUsableGroupExists = spec.groups.some(
+    (group) => group.id !== groupId && group.values.length > 0,
+  );
+
+  return anotherUsableGroupExists ? target.minimum : spec.length;
 }
 
 function compatibilityFindings(
@@ -122,25 +139,25 @@ function compatibilityFindings(
     {
       code: "LOWERCASE_MINIMUM_NOT_GUARANTEED" as const,
       expected: policy.minLowercase,
-      actual: options.lowercase ? guaranteedMinimum(options.minLowercase) : 0,
+      actual: guaranteedMinimumForGroup(options, "lowercase"),
       label: "lowercase",
     },
     {
       code: "UPPERCASE_MINIMUM_NOT_GUARANTEED" as const,
       expected: policy.minUppercase,
-      actual: options.uppercase ? guaranteedMinimum(options.minUppercase) : 0,
+      actual: guaranteedMinimumForGroup(options, "uppercase"),
       label: "uppercase",
     },
     {
       code: "DIGIT_MINIMUM_NOT_GUARANTEED" as const,
       expected: policy.minDigits,
-      actual: options.digits ? guaranteedMinimum(options.minDigits) : 0,
+      actual: guaranteedMinimumForGroup(options, "digits"),
       label: "digit",
     },
     {
       code: "SYMBOL_MINIMUM_NOT_GUARANTEED" as const,
       expected: policy.minSymbols,
-      actual: options.symbols ? guaranteedMinimum(options.minSymbols) : 0,
+      actual: guaranteedMinimumForGroup(options, "symbols"),
       label: "symbol",
     },
   ];
