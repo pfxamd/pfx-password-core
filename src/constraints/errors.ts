@@ -14,6 +14,13 @@ export class ConstraintConfigurationError extends Error {
   }
 }
 
+export class ConstraintComplexityError extends Error {
+  constructor(message = "The requested constraints exceed the computational safety limit.") {
+    super(message);
+    this.name = "ConstraintComplexityError";
+  }
+}
+
 export class UnsatisfiableConstraintsError extends Error {
   constructor(message = "The requested constraints have no valid sequences.") {
     super(message);
