@@ -2,9 +2,9 @@
 
 Security-focused TypeScript core for password and passphrase generation.
 
-> Status: early development. Secure randomness, the exact constrained sampler,
-> password generation, passphrase generation, generation-entropy analysis, and
-> isolated batch generation are implemented. The policy layer is still in progress.
+> Status: early development. Secure randomness, exact constrained sampling,
+> password and passphrase generation, generation-entropy analysis, isolated batch
+> generation, policy evaluation, and the initial public API are implemented.
 
 ## Design goals
 
@@ -80,6 +80,22 @@ The factory contract provides isolation at the JavaScript object level. A
 factory remains responsible for returning independently owned sources; the core
 cannot inspect hidden implementation state inside a custom source.
 
+### Policy layer
+
+The `src/policy` layer keeps recommendations separate from generator validity:
+
+- entropy targets are caller-configured advisories rather than hidden hard rules;
+- target-system composition requirements are modeled as compatibility policy;
+- compatibility checks verify what the generator guarantees, not what an output
+  will merely contain with high probability;
+- policy findings use stable machine-readable codes and structured metadata;
+- malformed policy configuration is rejected explicitly;
+- default generator options do not treat uppercase, digits, or symbols as
+  universal security requirements.
+
+The core intentionally does not define a universal entropy threshold. Applications
+can choose a target appropriate to their threat model and use case.
+
 ### Entropy engine
 
 The `src/entropy` layer derives generation entropy from the exact search space:
@@ -118,9 +134,72 @@ transformations. Those rules ensure that distinct generation paths cannot
 collapse into the same output while the core reports them as separate
 combinations.
 
-The package root intentionally exposes no stable public API yet. Public exports
-will be frozen only after the password, passphrase, constraints, and entropy
-contracts are finalized.
+## Public API
+
+The package root exposes the supported v1-facing surface while keeping the
+constraint sampler and implementation details internal.
+
+Normal generation uses Web Crypto automatically:
+
+```ts
+import {
+  generatePassword,
+  generatePassphrase,
+  generatePasswordBatch,
+  analyzePasswordGenerationEntropy,
+  evaluatePasswordPolicy,
+} from "pfx-password-core";
+
+const password = generatePassword({
+  length: 20,
+  lowercase: true,
+  uppercase: true,
+  digits: true,
+  symbols: true,
+});
+
+const passphrase = generatePassphrase(
+  { words: myExternalWordlist },
+  {
+    wordCount: 6,
+    separator: "-",
+  },
+);
+
+const batch = generatePasswordBatch(10, {
+  length: 20,
+  lowercase: true,
+  uppercase: true,
+  digits: true,
+  symbols: true,
+});
+
+const entropy = analyzePasswordGenerationEntropy({
+  length: 20,
+  lowercase: true,
+  uppercase: true,
+  digits: true,
+  symbols: true,
+});
+
+const policy = evaluatePasswordPolicy(
+  {
+    length: 20,
+    lowercase: true,
+    uppercase: true,
+    digits: true,
+    symbols: true,
+  },
+  {
+    recommendation: {
+      minimumEntropyBits: 128,
+    },
+  },
+);
+```
+
+Advanced callers and tests may inject a custom `RandomSource`. The production
+default remains `WebCryptoRandomSource`.
 
 ## Development
 
