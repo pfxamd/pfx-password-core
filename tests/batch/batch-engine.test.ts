@@ -40,6 +40,23 @@ describe("generateBatch", () => {
     expect(result).toEqual([0, 1, 2]);
   });
 
+  it("rejects invalid RandomSource values before generation starts", () => {
+    let generated = 0;
+
+    expect(() =>
+      generateBatch(
+        () => null as unknown as RandomSource,
+        1,
+        () => {
+          generated += 1;
+          return "secret";
+        },
+      ),
+    ).toThrow(BatchConfigurationError);
+
+    expect(generated).toBe(0);
+  });
+
   it("rejects reuse of the same RandomSource before generation starts", () => {
     const reused = new SequenceSource([0]);
     let generated = 0;
