@@ -203,7 +203,7 @@ default remains `WebCryptoRandomSource`.
 
 ## Development
 
-Requires Node.js 22 or newer.
+Requires Node.js 22 or newer and npm 11 for development.
 
 ```bash
 npm install
