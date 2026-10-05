@@ -8,6 +8,7 @@ import type {
 
 const DECIMAL_DIGITS = "0123456789";
 const DEFAULT_SYMBOLS = "!@#$%^&*";
+export const MAX_PASSPHRASE_WORD_COUNT = 4_096;
 
 interface PreparedPassphrase {
   readonly words: readonly string[];
@@ -107,10 +108,14 @@ function prepare(
   wordlist: PassphraseWordlist,
   options: PassphraseGenerationOptions,
 ): PreparedPassphrase {
-  if (!Number.isSafeInteger(options.wordCount) || options.wordCount <= 0) {
+  if (
+    !Number.isSafeInteger(options.wordCount) ||
+    options.wordCount <= 0 ||
+    options.wordCount > MAX_PASSPHRASE_WORD_COUNT
+  ) {
     throw new PassphraseConfigurationError(
       "INVALID_WORD_COUNT",
-      "wordCount must be a positive safe integer.",
+      `wordCount must be an integer between 1 and ${MAX_PASSPHRASE_WORD_COUNT}.`,
     );
   }
 
