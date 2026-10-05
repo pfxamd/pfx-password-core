@@ -3,15 +3,15 @@
 Security-focused TypeScript core for password and passphrase generation.
 
 > Status: early development. Secure randomness, the exact constrained sampler,
-> and the first password engine are implemented. Passphrase, entropy, batch,
-> and policy layers are still in progress.
+> password generation, and passphrase generation are implemented. Entropy,
+> batch, and policy layers are still in progress.
 
 ## Design goals
 
 - cryptographically secure randomness from Web Crypto;
 - unbiased bounded sampling using rejection sampling;
 - exact uniform sampling under minimum-group constraints;
-- exact password search-space counting with `BigInt`;
+- exact password and passphrase search-space counting with `BigInt`;
 - framework-independent core with zero runtime dependencies;
 - browser and Node.js support;
 - no storage, analytics, telemetry, or network requirement for generation;
@@ -62,6 +62,29 @@ The `src/password` layer currently supports:
 The implementation does not generate mandatory characters separately and then
 shuffle them. Passwords are sampled directly from the mathematically defined
 valid space.
+
+### Passphrase engine
+
+The `src/passphrase` layer currently supports:
+
+- caller-supplied external wordlists;
+- uniform ordered word selection with replacement;
+- custom non-empty separators;
+- deterministic capitalization without adding fake entropy;
+- optional uniformly selected decimal-number token;
+- optional uniformly selected symbol token;
+- exact `BigInt` search-space counting;
+- validation that preserves an injective text representation.
+
+The core intentionally contains no bundled wordlist. EFF, BIP39, language
+lists, or project-specific lists can be distributed separately with their own
+license and attribution.
+
+Passphrase v1 requires the separator to be non-empty and absent from every
+transformed word. It also rejects duplicate words after deterministic
+transformations. Those rules ensure that distinct generation paths cannot
+collapse into the same output while the core reports them as separate
+combinations.
 
 The package root intentionally exposes no stable public API yet. Public exports
 will be frozen only after the password, passphrase, constraints, and entropy
