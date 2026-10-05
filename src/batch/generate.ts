@@ -43,6 +43,17 @@ function prepareSources(
   for (let index = 0; index < count; index += 1) {
     const source = sourceFactory(index);
 
+    if (
+      source === null ||
+      typeof source !== "object" ||
+      typeof source.fill !== "function"
+    ) {
+      throw new BatchConfigurationError(
+        "INVALID_RANDOM_SOURCE",
+        "sourceFactory must return a valid RandomSource object for every batch item.",
+      );
+    }
+
     if (seenSources.has(source)) {
       throw new BatchConfigurationError(
         "REUSED_RANDOM_SOURCE",
