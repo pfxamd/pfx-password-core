@@ -5,6 +5,7 @@ import {
   writeFileSync,
 } from "node:fs";
 import { tmpdir } from "node:os";
+import process from "node:process";
 import { join, resolve } from "node:path";
 
 const npmCommand = process.platform === "win32" ? "npm.cmd" : "npm";
