@@ -127,6 +127,18 @@ describe("password option validation", () => {
     ).toThrow(PasswordConfigurationError);
   });
 
+  it("rejects invalid password lengths through the password API", () => {
+    expect(() =>
+      countPasswordSearchSpace({
+        length: -1,
+        lowercase: true,
+        uppercase: true,
+        digits: true,
+        symbols: true,
+      }),
+    ).toThrow(PasswordConfigurationError);
+  });
+
   it("rejects invalid minimums even when the group is disabled", () => {
     expect(() =>
       countPasswordSearchSpace({
