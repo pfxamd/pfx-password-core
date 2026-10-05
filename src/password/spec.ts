@@ -7,6 +7,7 @@ import {
   UPPERCASE,
 } from "./charsets.js";
 import { PasswordConfigurationError } from "./errors.js";
+import { MAX_PASSWORD_LENGTH } from "./limits.js";
 import type { PasswordGenerationOptions } from "./types.js";
 
 type GroupName = "lowercase" | "uppercase" | "digits" | "symbols";
@@ -45,10 +46,14 @@ function normalizeMinimum(group: RawGroup): number {
 export function buildPasswordSpec(
   options: PasswordGenerationOptions,
 ): ConstrainedSequenceSpec<string> {
-  if (!Number.isSafeInteger(options.length) || options.length < 0) {
+  if (
+    !Number.isSafeInteger(options.length) ||
+    options.length < 1 ||
+    options.length > MAX_PASSWORD_LENGTH
+  ) {
     throw new PasswordConfigurationError(
       "INVALID_LENGTH",
-      "length must be a non-negative safe integer.",
+      `length must be an integer between 1 and ${MAX_PASSWORD_LENGTH}.`,
     );
   }
 
