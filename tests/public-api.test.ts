@@ -43,7 +43,7 @@ describe("public API", () => {
         minLowercase: 1,
         minDigits: 1,
       },
-      new SequenceSource([0, 0, 0, 0]),
+      new SequenceSource([0, 0, 0, 0, 0]),
     );
 
     expect(password).toBe("a0");
@@ -72,7 +72,7 @@ describe("public API", () => {
         digits: false,
         symbols: false,
       },
-      (index) => new SequenceSource([index]),
+      (index) => new SequenceSource([0, index]),
     );
 
     expect(result).toEqual(["a", "b", "c"]);
