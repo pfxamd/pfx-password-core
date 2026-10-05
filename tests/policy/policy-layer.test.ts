@@ -120,6 +120,51 @@ describe("evaluatePasswordPolicy", () => {
     ]);
   });
 
+  it("recognizes an enabled group as fully guaranteed when it is the only usable group", () => {
+    const report = evaluatePasswordPolicy(
+      {
+        length: 12,
+        lowercase: true,
+        uppercase: false,
+        digits: false,
+        symbols: false,
+      },
+      {
+        compatibility: {
+          minLowercase: 12,
+        },
+      },
+    );
+
+    expect(report).toEqual({
+      satisfied: true,
+      findings: [],
+    });
+  });
+
+  it("accounts for exclusions when determining guaranteed composition", () => {
+    const report = evaluatePasswordPolicy(
+      {
+        length: 12,
+        lowercase: true,
+        uppercase: true,
+        digits: false,
+        symbols: false,
+        excludedCharacters: "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
+      },
+      {
+        compatibility: {
+          minLowercase: 12,
+        },
+      },
+    );
+
+    expect(report).toEqual({
+      satisfied: true,
+      findings: [],
+    });
+  });
+
   it("treats a disabled character group as guaranteeing zero characters", () => {
     const report = evaluatePasswordPolicy(
       {
