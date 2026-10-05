@@ -2,15 +2,16 @@
 
 Security-focused TypeScript core for password and passphrase generation.
 
-> Status: early development. The secure random layer and exact constrained
-> sequence sampler exist; password, passphrase, entropy, and batch engines are
-> not yet released.
+> Status: early development. Secure randomness, the exact constrained sampler,
+> and the first password engine are implemented. Passphrase, entropy, batch,
+> and policy layers are still in progress.
 
 ## Design goals
 
 - cryptographically secure randomness from Web Crypto;
 - unbiased bounded sampling using rejection sampling;
 - exact uniform sampling under minimum-group constraints;
+- exact password search-space counting with `BigInt`;
 - framework-independent core with zero runtime dependencies;
 - browser and Node.js support;
 - no storage, analytics, telemetry, or network requirement for generation;
@@ -45,6 +46,22 @@ The `src/constraints` layer can:
 
 For a valid search space of size `N`, each generated sequence has probability
 exactly `1 / N` under an unbiased `RandomSource`.
+
+### Password engine
+
+The `src/password` layer currently supports:
+
+- lowercase, uppercase, digits, and all 32 printable ASCII punctuation symbols;
+- independent minimum counts for each enabled group;
+- exclusion of ambiguous characters `0 O 1 l I`;
+- arbitrary additional character exclusions;
+- exact search-space counting through the constrained sampler;
+- direct uniform generation from the complete valid search space;
+- rejection of inconsistent options such as positive minimums on disabled groups.
+
+The implementation does not generate mandatory characters separately and then
+shuffle them. Passwords are sampled directly from the mathematically defined
+valid space.
 
 The package root intentionally exposes no stable public API yet. Public exports
 will be frozen only after the password, passphrase, constraints, and entropy
