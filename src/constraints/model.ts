@@ -1,4 +1,5 @@
 import {
+  ConstraintComplexityError,
   ConstraintConfigurationError,
   UnsatisfiableConstraintsError,
 } from "./errors.js";
@@ -6,6 +7,8 @@ import type { ConstrainedSequenceSpec } from "./types.js";
 import type { RandomSource } from "../random/random-source.js";
 import { uniformBigInt } from "../random/uniform-big-int.js";
 import { uniformInt } from "../random/uniform-int.js";
+
+const MAX_MEMOIZED_STATES = 250_000;
 
 interface PreparedGroup<T> {
   readonly id: string | undefined;
@@ -19,6 +22,13 @@ interface PreparedSpec<T> {
   readonly groups: readonly PreparedGroup<T>[];
   readonly minimums: readonly number[];
   readonly alphabetSize: bigint;
+}
+
+interface CountFrame {
+  readonly remaining: number;
+  readonly deficits: readonly number[];
+  readonly key: string;
+  expanded: boolean;
 }
 
 function prepareSpec<T>(spec: ConstrainedSequenceSpec<T>): PreparedSpec<T> {
@@ -56,7 +66,7 @@ function prepareSpec<T>(spec: ConstrainedSequenceSpec<T>): PreparedSpec<T> {
       if (seenValues.has(value)) {
         throw new ConstraintConfigurationError(
           "DUPLICATE_VALUE",
-          `a value is assigned more than once across constrained groups.`,
+          "a value is assigned more than once across constrained groups.",
         );
       }
 
@@ -95,55 +105,156 @@ function stateKey(remaining: number, deficits: readonly number[]): string {
   return `${remaining}|${deficits.join(",")}`;
 }
 
+function immediateCount<T>(
+  prepared: PreparedSpec<T>,
+  remaining: number,
+  deficits: readonly number[],
+): bigint | undefined {
+  const required = sum(deficits);
+
+  if (required > remaining) {
+    return 0n;
+  }
+
+  if (remaining === 0) {
+    return required === 0 ? 1n : 0n;
+  }
+
+  if (prepared.alphabetSize === 0n) {
+    return 0n;
+  }
+
+  if (required === 0) {
+    return prepared.alphabetSize ** BigInt(remaining);
+  }
+
+  return undefined;
+}
+
+function nextDeficits(deficits: readonly number[], groupIndex: number): number[] {
+  const next = [...deficits];
+  next[groupIndex] = Math.max(0, (next[groupIndex] ?? 0) - 1);
+  return next;
+}
+
 function createCounter<T>(prepared: PreparedSpec<T>) {
   const memo = new Map<string, bigint>();
 
+  const store = (key: string, value: bigint) => {
+    if (!memo.has(key) && memo.size >= MAX_MEMOIZED_STATES) {
+      throw new ConstraintComplexityError();
+    }
+
+    memo.set(key, value);
+  };
+
   const count = (remaining: number, deficits: readonly number[]): bigint => {
-    const required = sum(deficits);
+    const direct = immediateCount(prepared, remaining, deficits);
 
-    if (required > remaining) {
-      return 0n;
+    if (direct !== undefined) {
+      return direct;
     }
 
-    if (remaining === 0) {
-      return required === 0 ? 1n : 0n;
+    const initialKey = stateKey(remaining, deficits);
+    const initialCached = memo.get(initialKey);
+
+    if (initialCached !== undefined) {
+      return initialCached;
     }
 
-    if (prepared.alphabetSize === 0n) {
-      return 0n;
-    }
+    const scheduled = new Set<string>([initialKey]);
+    const stack: CountFrame[] = [
+      {
+        remaining,
+        deficits: [...deficits],
+        key: initialKey,
+        expanded: false,
+      },
+    ];
 
-    // Once all minimums are satisfied, every remaining position may use any
-    // value in the combined alphabet. This avoids unnecessary DP states.
-    if (required === 0) {
-      return prepared.alphabetSize ** BigInt(remaining);
-    }
+    while (stack.length > 0) {
+      const frame = stack[stack.length - 1];
 
-    const key = stateKey(remaining, deficits);
-    const cached = memo.get(key);
+      if (frame === undefined) {
+        throw new Error("Constraint counter reached an unreachable empty frame.");
+      }
 
-    if (cached !== undefined) {
-      return cached;
-    }
+      const cached = memo.get(frame.key);
 
-    let total = 0n;
-
-    for (let groupIndex = 0; groupIndex < prepared.groups.length; groupIndex += 1) {
-      const group = prepared.groups[groupIndex];
-
-      if (group === undefined || group.size === 0n) {
+      if (cached !== undefined) {
+        scheduled.delete(frame.key);
+        stack.pop();
         continue;
       }
 
-      const nextDeficits = [...deficits];
-      const currentDeficit = nextDeficits[groupIndex] ?? 0;
-      nextDeficits[groupIndex] = Math.max(0, currentDeficit - 1);
+      if (!frame.expanded) {
+        frame.expanded = true;
 
-      total += group.size * count(remaining - 1, nextDeficits);
+        for (let groupIndex = prepared.groups.length - 1; groupIndex >= 0; groupIndex -= 1) {
+          const group = prepared.groups[groupIndex];
+
+          if (group === undefined || group.size === 0n) {
+            continue;
+          }
+
+          const childDeficits = nextDeficits(frame.deficits, groupIndex);
+          const childRemaining = frame.remaining - 1;
+          const childDirect = immediateCount(prepared, childRemaining, childDeficits);
+
+          if (childDirect !== undefined) {
+            continue;
+          }
+
+          const childKey = stateKey(childRemaining, childDeficits);
+
+          if (!memo.has(childKey) && !scheduled.has(childKey)) {
+            scheduled.add(childKey);
+            stack.push({
+              remaining: childRemaining,
+              deficits: childDeficits,
+              key: childKey,
+              expanded: false,
+            });
+          }
+        }
+
+        continue;
+      }
+
+      let total = 0n;
+
+      for (let groupIndex = 0; groupIndex < prepared.groups.length; groupIndex += 1) {
+        const group = prepared.groups[groupIndex];
+
+        if (group === undefined || group.size === 0n) {
+          continue;
+        }
+
+        const childDeficits = nextDeficits(frame.deficits, groupIndex);
+        const childRemaining = frame.remaining - 1;
+        const childDirect = immediateCount(prepared, childRemaining, childDeficits);
+        const childCount =
+          childDirect ?? memo.get(stateKey(childRemaining, childDeficits));
+
+        if (childCount === undefined) {
+          throw new Error("Constraint counter reached an unresolved child state.");
+        }
+
+        total += group.size * childCount;
+      }
+
+      store(frame.key, total);
+      scheduled.delete(frame.key);
+      stack.pop();
     }
 
-    memo.set(key, total);
-    return total;
+    const result = memo.get(initialKey);
+
+    if (result === undefined) {
+      throw new Error("Constraint counter failed to resolve the requested state.");
+    }
+
+    return result;
   };
 
   return count;
@@ -167,11 +278,8 @@ function chooseWeightedGroup<T>(
       continue;
     }
 
-    const nextDeficits = [...deficits];
-    const currentDeficit = nextDeficits[groupIndex] ?? 0;
-    nextDeficits[groupIndex] = Math.max(0, currentDeficit - 1);
-
-    const weight = group.size * count(remaining - 1, nextDeficits);
+    const childDeficits = nextDeficits(deficits, groupIndex);
+    const weight = group.size * count(remaining - 1, childDeficits);
     weights.push(weight);
     totalWeight += weight;
   }
@@ -239,7 +347,6 @@ export function sampleConstrainedSequence<T>(
     }
 
     result.push(value);
-
     deficits[groupIndex] = Math.max(0, (deficits[groupIndex] ?? 0) - 1);
     remaining -= 1;
   }
