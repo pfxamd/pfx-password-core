@@ -3,8 +3,8 @@
 Security-focused TypeScript core for password and passphrase generation.
 
 > Status: early development. Secure randomness, the exact constrained sampler,
-> password generation, and passphrase generation are implemented. Entropy,
-> batch, and policy layers are still in progress.
+> password generation, passphrase generation, and generation-entropy analysis are
+> implemented. Batch and policy layers are still in progress.
 
 ## Design goals
 
@@ -62,6 +62,21 @@ The `src/password` layer currently supports:
 The implementation does not generate mandatory characters separately and then
 shuffle them. Passwords are sampled directly from the mathematically defined
 valid space.
+
+### Entropy engine
+
+The `src/entropy` layer derives generation entropy from the exact search space:
+
+- `combinations` remains an exact `BigInt`;
+- `bits` is defined as `log2(combinations)`;
+- `floorBits` is computed exactly;
+- very large search spaces are handled without converting the full `BigInt`
+  into a JavaScript `Number`;
+- unsatisfiable password configurations are rejected rather than assigned a
+  misleading strength value.
+
+Entropy in this layer describes the known uniform generation process. It is not
+a guessability estimate for human-chosen passwords.
 
 ### Passphrase engine
 
