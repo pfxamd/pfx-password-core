@@ -14,7 +14,7 @@ const git = (...args) => execFileSync('git', args, {
 
 function installCore() {
   let current = '';
-  try { current = JSON.parse(readFileSync(resolve(installed, 'package.json'), 'utf8')).version; } catch {}
+  try { current = JSON.parse(readFileSync(resolve(installed, 'package.json'), 'utf8')).version; } catch { current = ''; }
   if (current === pinnedVersion && existsSync(resolve(installed, 'src/index.mjs'))) return;
   mkdirSync(toolsRoot, { recursive: true });
   const manifest = resolve(toolsRoot, 'package.json');
