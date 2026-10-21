@@ -1,8 +1,10 @@
 # pfx-password-core
 
+[![Core version](./version-badge.svg)](./version.json)
+
 Security-focused TypeScript core for password and passphrase generation.
 
-> Current release target: `0.1.1`. The core implements secure random sourcing,
+> Current source version: see the badge above. The core implements secure random sourcing,
 > exact constrained sampling, password and passphrase generation, generation
 > entropy analysis, isolated batch generation, policy evaluation, and a public API.
 >
@@ -256,3 +258,7 @@ The project is licensed under Apache-2.0.
 
 See `THIRD_PARTY_NOTICES.md` for attribution related to incorporated or
 adapted open-source work.
+
+## Automatic source versions
+
+The badge, `version.json`, and package manifests share one Git-derived version. Run `node .pfx/release.mjs --sync` before a local build. Full Git history is required. Rebuilding the same source keeps the same number; metadata-only bot commits do not advance it. See [.pfx/RELEASE.md](.pfx/RELEASE.md).

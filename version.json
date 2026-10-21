@@ -1,0 +1,10 @@
+{
+  "schemaVersion": 1,
+  "kind": "core",
+  "product": "PFx Password Core",
+  "channel": "Alpha",
+  "version": "0.1.1",
+  "label": "Alpha 0.1.1",
+  "commit": "03a5484870001635c974017200b82425e57cf1f1",
+  "sourceDate": "2026-10-06T00:58:55+01:00"
+}

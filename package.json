@@ -16,7 +16,9 @@
     "README.md",
     "SECURITY.md",
     "THIRD_PARTY_NOTICES.md",
-    "CHANGELOG.md"
+    "CHANGELOG.md",
+    "version.json",
+    "version-badge.svg"
   ],
   "exports": {
     ".": {
@@ -35,7 +37,8 @@
     "test:browser": "vitest run --config vitest.browser.config.ts",
     "pack:check": "npm pack --dry-run",
     "prepare": "npm run build",
-    "test:consumer": "node scripts/consumer-smoke.mjs"
+    "test:consumer": "node scripts/consumer-smoke.mjs",
+    "release:version": "node .pfx/release.mjs --sync"
   },
   "devDependencies": {
     "@eslint/js": "10.0.1",
