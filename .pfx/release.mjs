@@ -13,8 +13,10 @@ const git = (...args) => execFileSync('git', args, {
 }).trim();
 
 function installCore() {
-  let current = '';
-  try { current = JSON.parse(readFileSync(resolve(installed, 'package.json'), 'utf8')).version; } catch { current = ''; }
+  const current = (() => {
+    try { return JSON.parse(readFileSync(resolve(installed, 'package.json'), 'utf8')).version; }
+    catch (error) { if (error.code === 'ENOENT') return null; throw error; }
+  })();
   if (current === pinnedVersion && existsSync(resolve(installed, 'src/index.mjs'))) return;
   mkdirSync(toolsRoot, { recursive: true });
   const manifest = resolve(toolsRoot, 'package.json');
