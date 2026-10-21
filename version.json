@@ -3,8 +3,8 @@
   "kind": "core",
   "product": "PFx Password Core",
   "channel": "Alpha",
-  "version": "0.1.2",
-  "label": "Alpha 0.1.2",
-  "commit": "1f84756966d855aa8717d8139fcbca0c5a442dc0",
-  "sourceDate": "2026-10-21T14:52:46+01:00"
+  "version": "0.1.3",
+  "label": "Alpha 0.1.3",
+  "commit": "004c9dc942e641f837946625bda7cd3c33820b03",
+  "sourceDate": "2026-10-21T18:19:45+01:00"
 }
